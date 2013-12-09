@@ -1,0 +1,1 @@
+cmd_/home/bill/gbtian/research/kernel/mpip/mpip.ko := ld -r -m elf_x86_64 -T /home/bill/gbtian/research/kernel/linux-3.12.1/scripts/module-common.lds --build-id  -o /home/bill/gbtian/research/kernel/mpip/mpip.ko /home/bill/gbtian/research/kernel/mpip/mpip.o /home/bill/gbtian/research/kernel/mpip/mpip.mod.o

@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+import os
+
+os.system('insmod idr.ko')
+os.system('rmmod idr')
+os.system('dmesg | tail -30')

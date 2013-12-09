@@ -1,0 +1,1 @@
+cmd_/home/bill/gbtian/research/kernel/mpip/mpip.o := ld -m elf_x86_64   -r -o /home/bill/gbtian/research/kernel/mpip/mpip.o /home/bill/gbtian/research/kernel/mpip/mpip_map.o /home/bill/gbtian/research/kernel/mpip/ip_mpip.o 
