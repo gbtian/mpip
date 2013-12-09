@@ -47,27 +47,30 @@ int mpip_rcv(struct sk_buff *skb)
 	return 0;
 }
 
- /*
-  * 	Process egress packets with mpip mechanism
-  */
-int	mpip_xmit(struct sk_buff *skb)
-{
-	return 0;
-}
 
-
-void mpip_options_build(struct sk_buff *skb, struct mpip_options *opt)
+void mpip_options_build(struct sk_buff *skb)
 {
+	struct mpip_options *opt;
+	unsigned char	node_id[ETH_ALEN] = {'a', 'b', 'c', 'd', 'f', 'g'};
+	opt = kmalloc(sizeof(struct mpip_options), GFP_KERNEL);
+
+	opt->optlen = sizeof(struct mpip_options);
+	memcpy(opt->node_id, node_id, ETH_ALEN);
+	opt->session_id = 8;
+	opt->path_id = 3;
+	opt->stat_path_id = 4;
+	opt->packetcount = 500;
+
+	//todo: the value of option will be extracted from all the tables.
+
 	unsigned char *iph = skb_network_header(skb);
 
 	memcpy(&(IPCB(skb)->opt), opt, sizeof(struct mpip_options));
 	memcpy(iph+sizeof(struct iphdr), opt->__data, opt->optlen);
-	opt = &(IPCB(skb)->opt);
-
 }
+EXPORT_SYMBOL(mpip_options_build);
 
-
-static inline bool mpip_rcv_options(struct sk_buff *skb)
+bool mpip_rcv_options(struct sk_buff *skb)
 {
 	struct mpip_options *opt;
 	const struct iphdr *iph;
@@ -80,71 +83,8 @@ static inline bool mpip_rcv_options(struct sk_buff *skb)
 
 	return true;
 }
+EXPORT_SYMBOL(mpip_rcv_options);
 
-
-
-unsigned char *form_mpip_options_string(mpip_options *opt)
-{
-	unsigned char *mpip_options;
-	unsigned char	session_id = 8;
-	unsigned char	path_id = 3;
-	unsigned char	stat_path_id = 4;
-	u32		packetcount = 500;
-
-	unsigned char	node_id[ETH_ALEN] = {'a', 'b', 'c', 'd', 'f', 'g'};
-	mpip_options = kmalloc(ETH_ALEN * 2 + 1, GFP_KERNEL);
-	memcpy(mpip_options, node_id, ETH_ALEN);
-
-
-    printk(KERN_ALERT "node_id = %s\n", node_id);
-    printk(KERN_ALERT "session_id = %d\n", session_id);
-    printk(KERN_ALERT "path_id = %d\n", path_id);
-    printk(KERN_ALERT "stat_path_id = %d\n", stat_path_id);
-    printk(KERN_ALERT "packetcount = %d\n", packetcount);
-
-	mpip_options[ETH_ALEN] = session_id;
-	mpip_options[ETH_ALEN + 1] = path_id;
-	mpip_options[ETH_ALEN + 2] = stat_path_id;
-	mpip_options[ETH_ALEN + 3] = ((unsigned char *)& packetcount)[0];
-	mpip_options[ETH_ALEN + 4] = ((unsigned char *)& packetcount)[1];
-	mpip_options[ETH_ALEN + 5] = ((unsigned char *)& packetcount)[2];
-	mpip_options[ETH_ALEN + 6] = ((unsigned char *)& packetcount)[3];
-
-    printk(KERN_ALERT "mpip_options = %s\n", mpip_options);
-
-	return mpip_options;
-}
-
-
-void extract_mpip_options(unsigned char *mpip_options)
-{
-	unsigned char	node_id[ETH_ALEN];
-	unsigned char	session_id;
-	unsigned char	path_id;
-	unsigned char	stat_path_id;
-	u32		packetcount;
-
-    printk(KERN_ALERT "1mpip_options = %s\n", mpip_options);
-
-	memcpy(node_id, mpip_options, ETH_ALEN);
-	session_id = mpip_options[ETH_ALEN];
-	path_id = mpip_options[ETH_ALEN + 1];
-	stat_path_id = mpip_options[ETH_ALEN + 2];
-
-	packetcount = (mpip_options[ETH_ALEN + 3] << 24) |
-			(mpip_options[ETH_ALEN + 4] << 16) |
-			(mpip_options[ETH_ALEN + 5] << 8) |
-			mpip_options[ETH_ALEN + 6];
-
-    printk(KERN_ALERT "1node_id = %s\n", node_id);
-    printk(KERN_ALERT "1session_id = %d\n", session_id);
-    printk(KERN_ALERT "1path_id = %d\n", path_id);
-    printk(KERN_ALERT "1stat_path_id = %d\n", stat_path_id);
-    printk(KERN_ALERT "1packetcount = %d\n", packetcount);
-
-    kfree(mpip_options);
-
-}
 
 void mpip_undo(void)
 {
